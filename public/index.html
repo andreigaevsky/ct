@@ -1,89 +1,186 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Заполнение вопросов</title>
+</head>
+<script type="text/javascript">
+  let questionId = 1;
+  const questionMap = new Map();
 
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/9.15.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/9.15.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/9.15.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/9.15.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/9.15.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/9.15.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/9.15.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/9.15.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/9.15.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/9.15.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+  const ANSWER_DIV = "answer ";
+  const ANSWER_CHECKBOX = "answerC ";
+  const ANSWERS_DIV = "answers ";
+  const QUESTION_DIV = "question ";
+  const QUESTION_INPUT = "questionI ";
+  const QUESTIONS_DIV = "questions";
+  const ANSWER_INPUT = "answerI ";
+  const QUESTION_ERROR_TEXT = "questionErrorT "
+  const GENERATE_BUTTON = "generateB"
 
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
-    </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+  function generateAnswers(answersNodes) {
+    const answersResult = [];
+    let answerId = 1;
+    for (let answerNodes of answersNodes) {
+      const answer = {};
+      answer.number = answerId++;
+      for (let answerNode of answerNodes.children) {
+        if (answerNode.id.startsWith(ANSWER_INPUT)) {
+          answer.label = answerNode.value;
+          if (!answer.label) {
+            answerNodes.focus();
+            throw new Error("Нет ответа");
+          }
         }
-      });
-    </script>
-  </body>
+        if (answerNode.id.startsWith(ANSWER_CHECKBOX)) {
+          answer.right = answerNode.checked;
+        }
+      }
+      answersResult.push(answer);
+    }
+
+    return answersResult;
+  }
+
+  function downloadReport () {
+    const link = document.createElement("a");
+    const file = new Blob([JSON.stringify(generateReport())], { type: 'text/plain' });
+    link.href = URL.createObjectURL(file);
+    link.download = "questions.json";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  function generateReport() {
+    const questionsNodes = document.getElementById(QUESTIONS_DIV).children;
+    const generateButton = document.getElementById(GENERATE_BUTTON);
+    generateButton.style.backgroundColor = 'white';
+    let questionNumber = 1;
+    const resultQuestions = [];
+    for (const questionNodes of questionsNodes) {
+      const question = {};
+      question.number = questionNumber++;
+      let errorText;
+      try {
+        for (const questionNode of questionNodes.children) {
+          if (questionNode.id.startsWith(QUESTION_ERROR_TEXT)) {
+            errorText = questionNode;
+            questionNode.innerHTML = '';
+          }
+          if (questionNode.id.startsWith(QUESTION_INPUT)) {
+            question.label = questionNode.value;
+            if (!question.label) {
+              throw new Error("Нет вопроса");
+            }
+          }
+          if (questionNode.id.startsWith(ANSWERS_DIV)) {
+            question.answers = generateAnswers(questionNode.children)
+            const correct = question.answers.filter(s => s.right === true).map(s => s.number);
+            if (correct.length < 1) {
+              questionNodes.focus();
+              throw new Error('Правильный ответ не выбран');
+            }
+            question.type = correct.length > 1 ? "multi" : "single";
+            question.correct = correct;
+          }
+        }
+      } catch (e) {
+        errorText.innerHTML = e;
+        generateButton.style.backgroundColor = 'red';
+        throw e;
+      }
+
+      resultQuestions.push(question);
+      console.log(question)
+    }
+
+    return resultQuestions;
+  }
+
+  function addNewQuestion() {
+    const questionsNode = document.getElementById(QUESTIONS_DIV);
+    questionsNode.appendChild(createQuestion(questionId));
+  }
+
+  function createAnswer(id) {
+    const answerNode = document.createElement("div");
+    answerNode.id = ANSWER_DIV + id;
+
+    const input = document.createElement("input");
+    input.placeholder = "Ответ " + id;
+    input.style.width = "30%"
+    input.id = ANSWER_INPUT + id;
+
+    const checkbox = document.createElement("input");
+    checkbox.id = ANSWER_CHECKBOX + id;
+    checkbox.type = "checkbox";
+
+    const remove = document.createElement("button");
+    remove.style.marginLeft = "20px"
+    remove.innerHTML = "x"
+    remove.onclick = () => answerNode.remove();
+
+    answerNode.append(input, checkbox, remove)
+    return answerNode;
+  }
+
+  function createQuestion(id) {
+    questionMap.set(id, 4);
+    const answerNode = document.createElement("div");
+    answerNode.id = QUESTION_DIV + id;
+    answerNode.style.marginBottom = "40px";
+
+    const input = document.createElement("input");
+    input.placeholder = "Вопрос " + id;
+    input.style.marginBottom = "10px";
+    input.style.width = "50%"
+    input.id = QUESTION_INPUT + id;
+
+    const error = document.createElement("b");
+    error.style.color = "red";
+    error.id = QUESTION_ERROR_TEXT + id;
+    error.style.marginRight = "10px"
+
+    const answersDiv = document.createElement("div");
+    answersDiv.id = ANSWERS_DIV + id;
+
+    const addAnswerButton = document.createElement("button");
+    addAnswerButton.innerHTML = "Добавить ответ"
+    answersDiv.appendChild(createAnswer(1));
+    answersDiv.appendChild(createAnswer(2));
+    answersDiv.appendChild(createAnswer(3));
+    addAnswerButton.onclick = () => {
+      answersDiv.appendChild(createAnswer(questionMap.get(id)));
+      questionMap.set(id, questionMap.get(id) + 1);
+    }
+
+    const removeQuestionButton = document.createElement("button");
+    removeQuestionButton.innerHTML = "x"
+    removeQuestionButton.style.marginLeft = "20px";
+    removeQuestionButton.onclick = () => {
+      answerNode.remove()
+    }
+
+    answerNode.append(error, input, addAnswerButton, removeQuestionButton, answersDiv);
+
+    questionId = questionId + 1;
+    return answerNode;
+  }
+</script>
+<body>
+<div>
+  <div id="questions">
+  </div>
+  <button style="margin-bottom: 50px" onclick="addNewQuestion()">Добавить вопрос</button>
+  <div>
+    <button id="generateB" style="margin-bottom: 50px; font-size: larger; font-style: italic"
+            onclick="downloadReport()">
+      Сгенерировать
+    </button>
+  </div>
+
+</div>
+</body>
 </html>
