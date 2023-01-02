@@ -17,8 +17,25 @@
   const ANSWER_INPUT = "answerI ";
   const QUESTION_ERROR_TEXT = "questionErrorT "
   const GENERATE_BUTTON = "generateB"
+  const FILE_INPUT = "fileI"
 
-
+    function uploadFile () {
+        Array.from(document.getElementById(QUESTIONS_DIV).children).forEach(c => c.remove());
+        const fileInput = document.getElementById(FILE_INPUT);
+        const selectedFiles = fileInput.files;
+        if(selectedFiles.length > 0) {
+           const file = selectedFiles[0];
+            let reader = new FileReader();
+            reader.readAsText(file);
+            reader.onload = function() {
+                JSON.parse(reader.result).forEach(r => {
+                    console.log("preparing")
+                    addNewQuestion( createQuestion(r.number, r));
+                    console.log("ready", r)
+                } );
+            };
+        }
+    }
 
   function generateAnswers(answersNodes) {
     const answersResult = [];
@@ -99,12 +116,17 @@
     return resultQuestions;
   }
 
-  function addNewQuestion() {
+  function addNewQuestion(question) {
     const questionsNode = document.getElementById(QUESTIONS_DIV);
-    questionsNode.appendChild(createQuestion(questionId));
+    if(question) {
+        questionsNode.appendChild(question);
+    } else{
+        questionsNode.appendChild(createQuestion(questionId));
+    }
+
   }
 
-  function createAnswer(id) {
+  function createAnswer(id, answer) {
     const answerNode = document.createElement("div");
     answerNode.id = ANSWER_DIV + id;
 
@@ -112,10 +134,16 @@
     input.placeholder = "Ответ " + id;
     input.style.width = "30%"
     input.id = ANSWER_INPUT + id;
+    if(answer) {
+        input.value = answer.label;
+    }
 
     const checkbox = document.createElement("input");
     checkbox.id = ANSWER_CHECKBOX + id;
     checkbox.type = "checkbox";
+      if(answer) {
+          checkbox.checked = answer.right;
+      }
 
     const remove = document.createElement("button");
     remove.style.marginLeft = "20px"
@@ -126,8 +154,8 @@
     return answerNode;
   }
 
-  function createQuestion(id) {
-    questionMap.set(id, 4);
+  function createQuestion(id, question) {
+    questionMap.set(id, question ?  question.answers.length + 1 : 4);
     const answerNode = document.createElement("div");
     answerNode.id = QUESTION_DIV + id;
     answerNode.style.marginBottom = "40px";
@@ -137,6 +165,9 @@
     input.style.marginBottom = "10px";
     input.style.width = "50%"
     input.id = QUESTION_INPUT + id;
+    if(question) {
+        input.value = question.label;
+    }
 
     const error = document.createElement("b");
     error.style.color = "red";
@@ -148,9 +179,15 @@
 
     const addAnswerButton = document.createElement("button");
     addAnswerButton.innerHTML = "Добавить ответ"
-    answersDiv.appendChild(createAnswer(1));
-    answersDiv.appendChild(createAnswer(2));
-    answersDiv.appendChild(createAnswer(3));
+      if(question) {
+          question.answers.forEach(a => {
+              answersDiv.appendChild(createAnswer(a.number, a))
+          })
+      } else {
+          answersDiv.appendChild(createAnswer(1));
+          answersDiv.appendChild(createAnswer(2));
+          answersDiv.appendChild(createAnswer(3));
+      }
     addAnswerButton.onclick = () => {
       answersDiv.appendChild(createAnswer(questionMap.get(id)));
       questionMap.set(id, questionMap.get(id) + 1);
@@ -179,6 +216,9 @@
             onclick="downloadReport()">
       Сгенерировать
     </button>
+  </div>
+  <div>
+    <input id="fileI" type="file" onchange="uploadFile()">
   </div>
 
 </div>
