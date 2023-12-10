@@ -33,7 +33,7 @@
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #DE3163;
         }
 
         p {
@@ -53,6 +53,7 @@
 <script>
 
     var comp = [
+        "не присылала нюдсы",
         "милая",
         "ласковая",
         "заботливая",
@@ -79,6 +80,7 @@
         "смешная",
         "гордая",
         "добролюбивая",
+        "не присылала нюдсы",
         "искренняя",
         "головокружительная",
         "бесподобная",
@@ -154,11 +156,32 @@
         "хозяйственная",
         "чудная",
         "экстравагантная",
+        "не присылала нюдсы"
     ]
+    var current = 0;
 
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function fillArrayWithRandomNumbers(n) {
+        // Create an array with numbers from 0 to n-1
+        const array = Array.from({ length: n }, (_, index) => index);
+
+        // Shuffle the array
+        shuffleArray(array);
+
+        return array;
+    }
+
+
+    const way = fillArrayWithRandomNumbers(comp.length);
 
     function showMessage() {
-        document.getElementById("message").innerHTML = "Серафима, ты сегодня " + comp[Math.floor(Math.random() * comp.length)];;
+        document.getElementById("message").innerHTML = "Серафима, ты сегодня " + comp[way[current++]] + "!";
     }
 </script>
 </body>
