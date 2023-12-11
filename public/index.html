@@ -1,238 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Заполнение вопросов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Style</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        button {
+            background-color: #DE3163;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #DE3163;
+        }
+
+        p {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
 </head>
-<script type="text/javascript">
-    let questionId = 1;
-    const questionMap = new Map();
 
-    const ANSWER_DIV = "answer ";
-    const ANSWER_CHECKBOX = "answerC ";
-    const ANSWERS_DIV = "answers ";
-    const QUESTION_DIV = "question ";
-    const QUESTION_INPUT = "questionI ";
-    const QUESTIONS_DIV = "questions";
-    const ANSWER_INPUT = "answerI ";
-    const QUESTION_ERROR_TEXT = "questionErrorT "
-    const GENERATE_BUTTON = "generateB"
-    const FILE_INPUT = "fileI"
+<body>
+<div class="container">
+    <button onclick="showMessage()">Just touch me a little!</button>
+    <p id="message"></p>
+</div>
 
-    function uploadFile() {
-        Array.from(document.getElementById(QUESTIONS_DIV).children).forEach(c => c.remove());
-        const fileInput = document.getElementById(FILE_INPUT);
-        const selectedFiles = fileInput.files;
-        if (selectedFiles.length > 0) {
-            const file = selectedFiles[0];
-            let reader = new FileReader();
-            reader.readAsText(file);
-            reader.onload = function () {
-                JSON.parse(reader.result).forEach(r => {
-                    console.log("preparing")
-                    addNewQuestion(createQuestion(r.number, r));
-                    console.log("ready", r)
-                });
-            };
+<script>
+
+    var comp = [
+        "не присылала нюдсы",
+        "милая",
+        "ласковая",
+        "заботливая",
+        "честная",
+        "приветливая",
+        "верная",
+        "незаменимая",
+        "сильная",
+        "умная",
+        "сексапильная",
+        "умопомрачительная",
+        "королевская",
+        "бодрая",
+        "всезнающая",
+        "коварная",
+        "модная",
+        "няшная",
+        "пушистая",
+        "сексуальная",
+        "желанная",
+        "шикарная",
+        "необычная",
+        "веселая",
+        "смешная",
+        "гордая",
+        "добролюбивая",
+        "не присылала нюдсы",
+        "искренняя",
+        "головокружительная",
+        "бесподобная",
+        "беспринципиальная",
+        "дорогая",
+        "значимая",
+        "незаменимая",
+        "миролюбивая",
+        "чистосердечная",
+        "непредсказуемая",
+        "соблазнительная",
+        "гордая",
+        "волшебная",
+        "божественная",
+        "сногсшибательная",
+        "привлекательная",
+        "стильная",
+        "трогательная",
+        "классная",
+        "правильная",
+        "заботливая",
+        "загадочная",
+        "напористая",
+        "добрая",
+        "сборник комплиментов",
+        "любезная",
+        "неприступная",
+        "удачливая",
+        "чуткая",
+        "чрезвычайная",
+        "бесценная",
+        "остроумная",
+        "гениальная",
+        "открытая",
+        "грациозная",
+        "спортивная",
+        "вежливая",
+        "хозяйственная",
+        "галантная",
+        "ловкая",
+        "любопытная",
+        "неприступная",
+        "могучая",
+        "неимоверная",
+        "деловая",
+        "открытая",
+        "жгучая",
+        "неземная",
+        "бесценная",
+        "видная",
+        "ароматная",
+        "горячая",
+        "гламурная",
+        "естественная",
+        "забавная",
+        "золотая",
+        "звездная",
+        "искренняя",
+        "искрометная",
+        "медовая",
+        "модняшка",
+        "неординарная",
+        "новая",
+        "няшная",
+        "обаятельная",
+        "огненная",
+        "прилежная",
+        "праздничная",
+        "ритмичная",
+        "стройная",
+        "сумасшедшая",
+        "терпеливая",
+        "хозяйственная",
+        "чудная",
+        "экстравагантная",
+        "не присылала нюдсы"
+    ]
+    var current = 0;
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
         }
     }
 
-    function generateAnswers(answersNodes) {
-        const answersResult = [];
-        let answerId = 1;
-        for (let answerNodes of answersNodes) {
-            const answer = {};
-            answer.number = answerId++;
-            for (let answerNode of answerNodes.children) {
-                if (answerNode.id.startsWith(ANSWER_INPUT)) {
-                    answer.label = answerNode.value;
-                    if (!answer.label) {
-                        answerNodes.focus();
-                        throw new Error("Нет ответа");
-                    }
-                }
-                if (answerNode.id.startsWith(ANSWER_CHECKBOX)) {
-                    answer.right = answerNode.checked;
-                }
-            }
-            answersResult.push(answer);
-        }
+    function fillArrayWithRandomNumbers(n) {
+        // Create an array with numbers from 0 to n-1
+        const array = Array.from({ length: n }, (_, index) => index);
 
-        return answersResult;
+        // Shuffle the array
+        shuffleArray(array);
+
+        return array;
     }
 
-    function downloadReport() {
-        const link = document.createElement("a");
-        const questionsNodes = document.getElementById(QUESTIONS_DIV).children;
-        const file = new Blob([JSON.stringify(generateReport(questionsNodes))], {type: 'text/plain'});
-        link.href = URL.createObjectURL(file);
-        link.download = "questions.json";
-        link.click();
-        URL.revokeObjectURL(link.href);
-    }
 
-    function generateReport(questionsNodes) {
-        const generateButton = document.getElementById(GENERATE_BUTTON);
-        generateButton.style.backgroundColor = 'white';
-        let questionNumber = 1;
-        const resultQuestions = [];
-        for (const questionNodes of questionsNodes) {
-            const question = {};
-            question.number = questionNumber++;
-            let errorText;
-            try {
-                for (const questionNode of questionNodes.children) {
-                    if (questionNode.id.startsWith(QUESTION_ERROR_TEXT)) {
-                        errorText = questionNode;
-                        questionNode.innerHTML = '';
-                    }
-                    if (questionNode.id.startsWith(QUESTION_INPUT)) {
-                        question.label = questionNode.value;
-                        if (!question.label) {
-                            throw new Error("Нет вопроса");
-                        }
-                    }
-                    if (questionNode.id.startsWith(ANSWERS_DIV)) {
-                        question.answers = generateAnswers(questionNode.children)
-                        const correct = question.answers.filter(s => s.right === true).map(s => s.number);
-                        if (correct.length < 1) {
-                            questionNodes.focus();
-                            throw new Error('Правильный ответ не выбран');
-                        }
-                        question.type = correct.length > 1 ? "multi" : "single";
-                        question.correct = correct;
-                    }
-                }
-            } catch (e) {
-                errorText.innerHTML = e;
-                generateButton.style.backgroundColor = 'red';
-                throw e;
-            }
+    const way = fillArrayWithRandomNumbers(comp.length);
 
-            resultQuestions.push(question);
-            console.log(question)
-        }
-
-        return resultQuestions;
-    }
-
-    function addNewQuestion(question) {
-        const questionsNode = document.getElementById(QUESTIONS_DIV);
-        if (question) {
-            questionsNode.appendChild(question);
-        } else {
-            questionsNode.appendChild(createQuestion(questionId));
-        }
-    }
-
-    function copyQuestion(questionToCopyId) {
-        const questionNode = document.getElementById(QUESTION_DIV + questionToCopyId);
-        const copy = generateReport([questionNode])[0];
-        addNewQuestion(createQuestion(questionId, copy));
-    }
-
-    function createAnswer(id, answer) {
-        const answerNode = document.createElement("div");
-        answerNode.id = ANSWER_DIV + id;
-
-        const input = document.createElement("input");
-        input.placeholder = "Ответ " + id;
-        input.style.width = "30%"
-        input.id = ANSWER_INPUT + id;
-        if (answer) {
-            input.value = answer.label;
-        }
-
-        const checkbox = document.createElement("input");
-        checkbox.id = ANSWER_CHECKBOX + id;
-        checkbox.type = "checkbox";
-        if (answer) {
-            checkbox.checked = answer.right;
-        }
-
-        const remove = document.createElement("button");
-        remove.style.marginLeft = "20px"
-        remove.innerHTML = "x"
-        remove.onclick = () => answerNode.remove();
-
-        answerNode.append(input, checkbox, remove)
-        return answerNode;
-    }
-
-    function createQuestion(id, question) {
-        questionMap.set(id, question ? question.answers.length + 1 : 4);
-        const answerNode = document.createElement("div");
-        answerNode.id = QUESTION_DIV + id;
-        answerNode.style.marginBottom = "40px";
-
-        const input = document.createElement("input");
-        input.placeholder = "Вопрос " + id;
-        input.style.marginBottom = "10px";
-        input.style.width = "50%"
-        input.id = QUESTION_INPUT + id;
-        if (question) {
-            input.value = question.label;
-        }
-
-        const error = document.createElement("b");
-        error.style.color = "red";
-        error.id = QUESTION_ERROR_TEXT + id;
-        error.style.marginRight = "10px"
-
-        const answersDiv = document.createElement("div");
-        answersDiv.id = ANSWERS_DIV + id;
-
-        const addAnswerButton = document.createElement("button");
-        addAnswerButton.innerHTML = "Добавить ответ"
-        if (question) {
-            question.answers.forEach(a => {
-                answersDiv.appendChild(createAnswer(a.number, a))
-            })
-        } else {
-            answersDiv.appendChild(createAnswer(1));
-            answersDiv.appendChild(createAnswer(2));
-            answersDiv.appendChild(createAnswer(3));
-        }
-        addAnswerButton.onclick = () => {
-            answersDiv.appendChild(createAnswer(questionMap.get(id)));
-            questionMap.set(id, questionMap.get(id) + 1);
-        }
-
-        const removeQuestionButton = document.createElement("button");
-        removeQuestionButton.innerHTML = "x"
-        removeQuestionButton.style.marginLeft = "20px";
-        removeQuestionButton.onclick = () => {
-            answerNode.remove()
-        }
-
-        const copyQuestionButton = document.createElement("button");
-        copyQuestionButton.innerHTML = "copy"
-        copyQuestionButton.style.marginLeft = "20px";
-        copyQuestionButton.onclick = () => {
-            copyQuestion(id);
-        }
-
-        answerNode.append(error, input, addAnswerButton, removeQuestionButton, copyQuestionButton, answersDiv);
-
-        questionId = questionId + 1;
-        return answerNode;
+    function showMessage() {
+        document.getElementById("message").innerHTML = "Серафима, ты сегодня " + comp[way[current++]] + "!";
     }
 </script>
-<body>
-<div>
-    <div id="questions">
-    </div>
-    <button style="margin-bottom: 50px" onclick="addNewQuestion()">Добавить вопрос</button>
-    <div>
-        <button id="generateB" style="margin-bottom: 50px; font-size: larger; font-style: italic"
-                onclick="downloadReport()">
-            Сгенерировать
-        </button>
-    </div>
-    <div>
-        <input id="fileI" type="file" onchange="uploadFile()">
-    </div>
-
-</div>
 </body>
+
 </html>
