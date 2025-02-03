@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Заполнение вопросов</title>
     <style>
         body {
@@ -12,6 +12,10 @@
             align-items: center;
             display: flex;
             justify-content: center;
+        }
+        .actions {
+            display: flex;
+            gap: 10px
         }
         .container {
             text-align: center;
@@ -110,10 +114,6 @@
             .question-container {
                 padding: 10px;
             }
-
-            input, button {
-                width: 100%;
-            }
         }
     </style>
 </head>
@@ -143,6 +143,7 @@
     const ANSWER_DIV = "answer ";
     const ANSWER_CHECKBOX = "answerC ";
     const ANSWERS_DIV = "answers ";
+    const ACTION_DIV = "actions ";
     const QUESTION_DIV = "question ";
     const QUESTION_INPUT = "questionI ";
     const QUESTIONS_DIV = "questions";
@@ -336,22 +337,28 @@
             questionMap.set(id, questionMap.get(id) + 1);
         }
 
+        const actionsDiv = document.createElement("div");
+        actionsDiv.id = ACTION_DIV + id;
+        actionsDiv.className = 'actions';
+
         const removeQuestionButton = document.createElement("button");
         removeQuestionButton.innerHTML = "Удалить вопрос"
         removeQuestionButton.className = 'remove-btn'
-        removeQuestionButton.style.marginLeft = "20px";
         removeQuestionButton.onclick = () => {
             answerNode.remove()
         }
 
         const copyQuestionButton = document.createElement("button");
-        copyQuestionButton.innerHTML = "Скопировать"
+        copyQuestionButton.innerHTML = "Скопировать вопрос"
         copyQuestionButton.style.marginLeft = "20px";
         copyQuestionButton.onclick = () => {
             copyQuestion(id);
         }
 
-        answerNode.append(error, input, removeQuestionButton, copyQuestionButton, answersDiv, addAnswerButton);
+        actionsDiv.appendChild(removeQuestionButton);
+        actionsDiv.appendChild(copyQuestionButton)
+
+        answerNode.append(error, input, actionsDiv, answersDiv, addAnswerButton);
 
         questionId = questionId + 1;
         return answerNode;
