@@ -3,7 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <title>Заполнение вопросов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: white;
+            color: #333;
+            align-items: center;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+        }
+        textarea {
+            width: 100%;
+            resize: vertical; /* Allows vertical resizing */
+        }
+
+        #questions {
+            margin-bottom: 20px;
+        }
+
+        input, button {
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .answer-container {
+            margin-top: 10px;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .add-btn {
+            background-color: #4f932a;
+            color: white;
+            padding: 10px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .add-q-btn {
+            background-color: #1c4008;
+            color: white;
+            padding: 10px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .remove-btn {
+            background-color: darkred;
+            color: white;
+            padding: 10px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .remove-btn:hover {
+            background-color: red;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                margin: 10px;
+            }
+
+            .question-container {
+                padding: 10px;
+            }
+
+            input, button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
+<body>
+<div class="container">
+    <div>
+
+        <div id="questions">
+        </div>
+        <button class="add-q-btn" style="margin-bottom: 50px" onclick="addNewQuestion()">Добавить вопрос</button>
+        <div>
+            <button id="generateB" style="margin-bottom: 50px; font-size: larger; font-style: italic"
+                    onclick="downloadReport()">
+                Сгенерировать файл
+            </button>
+        </div>
+        <div>
+            <label for="fileI">Продолжить заполнение</label>
+            <input id="fileI" type="file" onchange="uploadFile()">
+        </div>
+    </div>
+</div>
 <script type="text/javascript">
     let questionId = 1;
     const questionMap = new Map();
@@ -134,10 +262,11 @@
     function createAnswer(id, answer) {
         const answerNode = document.createElement("div");
         answerNode.id = ANSWER_DIV + id;
+        answerNode.style.display = "flex"
 
         const input = document.createElement("input");
         input.placeholder = "Ответ " + id;
-        input.style.width = "30%"
+        input.style.flex = "1"
         input.id = ANSWER_INPUT + id;
         if (answer) {
             input.value = answer.label;
@@ -146,13 +275,15 @@
         const checkbox = document.createElement("input");
         checkbox.id = ANSWER_CHECKBOX + id;
         checkbox.type = "checkbox";
+        checkbox.style.marginLeft = "20px"
         if (answer) {
             checkbox.checked = answer.right;
         }
 
         const remove = document.createElement("button");
         remove.style.marginLeft = "20px"
-        remove.innerHTML = "x"
+        remove.innerHTML = "Удалить"
+        remove.className = 'remove-btn'
         remove.onclick = () => answerNode.remove();
 
         answerNode.append(input, checkbox, remove)
@@ -164,11 +295,13 @@
         const answerNode = document.createElement("div");
         answerNode.id = QUESTION_DIV + id;
         answerNode.style.marginBottom = "40px";
+        answerNode.className = 'question-container'
 
-        const input = document.createElement("input");
+        const input = document.createElement("textarea");
+        input.rows = 3;
         input.placeholder = "Вопрос " + id;
         input.style.marginBottom = "10px";
-        input.style.width = "50%"
+        input.style.width = "100%"
         input.id = QUESTION_INPUT + id;
         if (question) {
             input.value = question.label;
@@ -177,13 +310,14 @@
         const error = document.createElement("b");
         error.style.color = "red";
         error.id = QUESTION_ERROR_TEXT + id;
-        error.style.marginRight = "10px"
 
         const answersDiv = document.createElement("div");
+        answersDiv.className = 'answer-container'
         answersDiv.id = ANSWERS_DIV + id;
 
         const addAnswerButton = document.createElement("button");
         addAnswerButton.innerHTML = "Добавить ответ"
+        addAnswerButton.className = "add-btn"
         if (question) {
             question.answers.forEach(a => {
                 answersDiv.appendChild(createAnswer(a.number, a))
@@ -199,40 +333,25 @@
         }
 
         const removeQuestionButton = document.createElement("button");
-        removeQuestionButton.innerHTML = "x"
+        removeQuestionButton.innerHTML = "Удалить вопрос"
+        removeQuestionButton.className = 'remove-btn'
         removeQuestionButton.style.marginLeft = "20px";
         removeQuestionButton.onclick = () => {
             answerNode.remove()
         }
 
         const copyQuestionButton = document.createElement("button");
-        copyQuestionButton.innerHTML = "copy"
+        copyQuestionButton.innerHTML = "Скопировать"
         copyQuestionButton.style.marginLeft = "20px";
         copyQuestionButton.onclick = () => {
             copyQuestion(id);
         }
 
-        answerNode.append(error, input, addAnswerButton, removeQuestionButton, copyQuestionButton, answersDiv);
+        answerNode.append(error, input, removeQuestionButton, copyQuestionButton, answersDiv, addAnswerButton);
 
         questionId = questionId + 1;
         return answerNode;
     }
 </script>
-<body>
-<div>
-    <div id="questions">
-    </div>
-    <button style="margin-bottom: 50px" onclick="addNewQuestion()">Добавить вопрос</button>
-    <div>
-        <button id="generateB" style="margin-bottom: 50px; font-size: larger; font-style: italic"
-                onclick="downloadReport()">
-            Сгенерировать
-        </button>
-    </div>
-    <div>
-        <input id="fileI" type="file" onchange="uploadFile()">
-    </div>
-
-</div>
 </body>
 </html>
